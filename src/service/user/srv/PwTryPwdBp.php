@@ -55,7 +55,7 @@ class PwTryPwdBp {
 		//手机号码登录
 		if (PwUserValidator::isMobileValid($username) === true && in_array(4, $this->loginConfig['ways'])) {
 			$mobileInfo = Wekit::load('user.PwUserMobile')->getByMobile($username);
-			if (!$mobileInfo) return $this->checkVerifyResult(-1, array());
+			if (!$mobileInfo) return $this->checkVerifyResult(-1, array(),$ip);
 			$r = $this->_getWindid()->login($mobileInfo['uid'], $password, 1, $checkQ, $safeQuestion, $safeAnswer);
 		}
 		//UID登录
@@ -71,7 +71,7 @@ class PwTryPwdBp {
 		if ($r[0] == -14 && in_array(3, $this->loginConfig['ways'])) {
 			$r = $this->_getWindid()->login($username, $password, 2, $checkQ, $safeQuestion, $safeAnswer);
 		}
-		return $this->checkVerifyResult($r[0], $r[1]);
+		return $this->checkVerifyResult($r[0], $r[1], $ip);
 	}
 
 	/**
@@ -85,7 +85,7 @@ class PwTryPwdBp {
 	 */
 	public function checkPassword($uid, $password, $ip = '', $checkQ = false, $safeQuestion = '', $safeAnswer = '') {
 		$r = $this->_getWindid()->login($uid, $password, 1, $checkQ, $safeQuestion, $safeAnswer);
-		return $this->checkVerifyResult($r[0], $r[1]);
+		return $this->checkVerifyResult($r[0], $r[1], $ip);
 	}
 
 	/** 
@@ -189,7 +189,7 @@ class PwTryPwdBp {
 	 * @param array $info
 	 * @return array|PwError
 	 */
-	protected function checkVerifyResult($status, $info) {
+	protected function checkVerifyResult($status, $info, $ip) {
 		switch ($status) {
 			case 1://用户信息正常
 				if (true !== ($r = $this->allowTryAgain($info['uid'], $ip))) {
